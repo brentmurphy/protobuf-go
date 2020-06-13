@@ -6,7 +6,9 @@
 package strs
 
 import (
+	"fmt"
 	"go/token"
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -64,7 +66,22 @@ func GoCamelCase(s string) string {
 			}
 		}
 	}
-	return string(b)
+	// NOTE: Brent
+	return permitCommonAcronyms(string(b))
+}
+
+// NOTE: Brent
+func permitCommonAcronyms(input string) string {
+	acronyms := []string{"Url", "Id", "Api"}
+
+	for _, ac := range acronyms {
+		re := regexp.MustCompile(fmt.Sprintf(`(%s)([A-Z]|\b|s)`, ac))
+		if re.MatchString(input) {
+			input = re.ReplaceAllString(input, strings.ToUpper(ac)+"$2")
+		}
+	}
+
+	return input
 }
 
 // GoSanitized converts a string to a valid Go identifier.
